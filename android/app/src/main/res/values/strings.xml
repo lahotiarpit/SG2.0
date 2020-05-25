@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_type">com.mahindra.sf.login</string>
+	<string name="app_name"><b>Sales Genie 2.0</b></string>
+	<string name="app_package">com.mahindra.sf</string>
+</resources>

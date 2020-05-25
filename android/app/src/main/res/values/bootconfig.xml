@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="remoteAccessConsumerKey">3MVG910YPh8zrcR2.4zM097KbBAt1IaeiDhno73O1o.dkjs4GDWaZKoHQLUoeI1YD8j8tGf5dv5JMFUbQgijs</string>
+    <string name="oauthRedirectURI">https://mahindradealerworld--acedev.my.salesforce.com/callback</string>
+    <string-array name="oauthScopes">
+        <!-- <item>api</item>
+		<item>web</item> -->
+    </string-array>
+    <string name="androidPushNotificationClientId"></string>
+</resources>

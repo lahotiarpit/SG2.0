@@ -1,0 +1,539 @@
+import React, { Component } from "react";
+import Modal, { ModalContent } from "react-native-modal";
+import ViewMoreText from "react-native-view-more-text";
+import {
+  StyleSheet,
+  ScrollView,
+  Linking,
+  Platform,
+  AppState,
+  PermissionsAndroid,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
+import {
+  Label,
+  Row,
+  Picker,
+  Container,
+  Left,
+  Right,
+  Body,
+  Header,
+  Icon,
+  View,
+  Text,
+  Button,
+  Content,
+  Item,
+  Thumbnail,
+  DatePicker,
+  Tab,
+  Tabs,
+} from "native-base";
+import {
+  ScrollableTabView,
+  ScrollableTabBar,
+} from "@valdio/react-native-scrollable-tabview";
+import {
+  FAB,
+  IconButton,
+  Paragraph,
+  Dialog,
+  Portal,
+  TextInput,
+  RadioButton,
+} from "react-native-paper";
+import {
+  forceUtil,
+  mobilesync,
+  oauth,
+  net,
+  smartstore,
+} from "react-native-force";
+import Timelinee from "./Timelinee";
+import taskPickList from "../PicklistHelpers/TaskPickListHelper";
+
+import Task from "../soups/Task";
+import SoupHelper from "../soups/SoupHelper";
+
+var SharedPreferences = require("react-native-shared-preferences");
+
+// import { PermissionsAndroid } from "react-native";
+import CallLogs from "react-native-call-log";
+import { moveCursorToPreviousPage } from "react-native-force/src/react.force.smartstore";
+
+// const stack = createStackNavigator({
+//      Enquiry : {screen : Enquiry},
+//      Booking : {screen : Booking}
+// })
+
+// export default createAppNavigator(stack);
+
+export default class QECustomer360 extends Component {
+  owner_id;
+
+  constructor(props) {
+    console.log("$#$#$#$#$#" + JSON.stringify(props));
+    super(props);
+    this.state = {
+      QuickEnquiryId: props.route.params.QuickEnquiryId,
+      quickEnquiryData: undefined,
+      // response: props.route.params.props.response.records[0],
+      enquiryId: props.route.params.props.enquiryId,
+      OwnerId: undefined,
+      enquiryData: undefined,
+      ownerId: undefined,
+      customerData: [],
+      productData: [],
+      callDuration: 0,
+      enquiryIdFromSearch: props.route.params.props.enquiryIdFromSearch,
+      id:
+        props.route.params.props.enquiryId == undefined
+          ? props.route.params.props.enquiryIdFromSearch
+          : props.route.params.props.enquiryId,
+    };
+  }
+
+  async componentDidMount() {
+    AppState.addEventListener("change", (state) => this.getCallDuration());
+
+    SharedPreferences.getItem("OwnerId", (ownerId) => {
+      this.setState({ ownerId: ownerId });
+    });
+
+    SharedPreferences.getItem("AccessToken", (accessToken) => {
+      this.setState({ AccessToken: accessToken });
+    });
+
+    net.query(
+      // "Select Id, Name, MobilePhone, Email, Status from Lead order by createdDate desc limit 10",
+      "SELECT Id, Name, Email, MobilePhone, Enquiry_Type__c, Likely_Purchase__c, Enquiry_Source__c, Enquiry_Sub_Source__c, Segment__c, (SELECT Id, Subject, Activity_Type__c, Model__c, Product_Family__c ,Status, Status__c,Dealer_Remarks__c,Dealer_Remarks_Type__c,Dealer_Remarks_Subtype__c,Call_Start_Time__c, Actual_CallTime__c, Call_End_Time__c, WhoId  FROM Tasks where IsClosed= false), ( Select Id, Product_Family_Text__c, Interest_Category__c, Quantity__c,Vehicle_Colors__c, Product_Family_Variant__c, Fuel_Type_Text__c, Seating_Capacity_Text__c, Lead__c from Product_Interests__r) FROM Lead WHERE Id = '" +
+        this.state.id +
+        "'",
+      (data) => {
+        console.log("++++++++++++++++" + JSON.stringify(data));
+        this.setState({
+          customerData: data.records[0],
+          productData: data.records[0].Product_Interests__r.records,
+          recentQELoading: false,
+        });
+        console.log("%%%%%%%%%%%%%%%" + JSON.stringify(data));
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
+
+    this.getCallDuration();
+  }
+
+  componentDidUpdate() {
+    if (
+      this.state.id &&
+      this.state.ownerId &&
+      this.state.enquiryData == undefined
+    ) {
+      net.query(
+        "SELECT Id, Name, Email, MobilePhone, Enquiry_Type__c, Likely_Purchase__c, Enquiry_Source__c, Enquiry_Sub_Source__c, Segment__c, (SELECT Id, Subject, Activity_Type__c, Model__c, Product_Family__c ,Status, Status__c,Dealer_Remarks__c,Dealer_Remarks_Type__c,Dealer_Remarks_Subtype__c,Call_Start_Time__c, Actual_CallTime__c, Call_End_Time__c, WhoId  FROM Tasks where IsClosed= false), ( Select Id, Product_Family_Text__c, Interest_Category__c, Quantity__c,Vehicle_Colors__c, Product_Family_Variant__c, Fuel_Type_Text__c, Seating_Capacity_Text__c, Lead__c from Product_Interests__r) FROM Lead WHERE OwnerId = '" +
+          this.state.ownerId +
+          "' AND Id = '" +
+          this.state.id +
+          "'",
+        (response) => {
+          console.log("=== " + JSON.stringify(response));
+          this.setState({
+            enquiryData: response,
+          });
+        },
+        (err) => {
+          console.log("************1");
+          console.log(err);
+        }
+      );
+    }
+  }
+
+  getCallDuration = () => {
+    // To get call duration
+    try {
+      const granted = PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,
+        {
+          title: "Call Log Example",
+          message: "Access your call logs",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        let countSeconds = 0;
+        const a = [];
+
+        let todayMidnight = new Date();
+        todayMidnight.setHours(0);
+        todayMidnight.setMinutes(0);
+        todayMidnight.setSeconds(0);
+        todayMidnight.setMilliseconds(0);
+
+        CallLogs.loadAll().then((c) => {
+          c.map((h) => {
+            if (
+              new Date(h.dateTime).getTime() >= todayMidnight.getTime() &&
+              h.phoneNumber.indexOf(
+                this.state.enquiryData.records[0].Contact__r.MobilePhone
+              ) > -1
+            ) {
+              a.push(h.duration);
+            }
+          });
+
+          if (a.length > 0)
+            countSeconds = a.reduce((result, number) => result + number);
+
+          console.log("=+=+=+=+=+=+=");
+          this.setState({
+            callDuration: countSeconds,
+          });
+        });
+      } else {
+        console.log("Call Log permission denied");
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+
+  renderViewMore(onPress) {
+    return (
+      <Button small style={styles.showMoreButton} onPress={onPress}>
+        <Text>show more</Text>
+      </Button>
+    );
+  }
+
+  renderViewLess(onPress) {
+    return (
+      <Button small style={styles.showLessButton} onPress={onPress}>
+        <Text>show less</Text>
+      </Button>
+    );
+  }
+
+  render() {
+    console.log("%%%%%%%%$$$#@$#%#$%"+JSON.stringify(this.state.enquiryData));
+    let keys = Object.keys(this.state.customerData);
+    return (
+      <Container>
+        <Header style={styles.header} androidStatusBarColor="#A31837">
+          <Left>
+            <Button transparent>
+              <Icon
+                name="md-arrow-back"
+                onPress={() => this.props.navigation.navigate("Home")}
+              />
+            </Button>
+          </Left>
+          <Body>
+            <Text style={{ color: "white" }}>
+              {this.state.customerData.Name}
+            </Text>
+          </Body>
+          <Right>
+            {/* <IconButton
+                icon="phone"
+                color="white"
+                onPress={this.makeCall}
+              ></IconButton> */}
+          </Right>
+        </Header>
+        <Content>
+          <View style={styles.collapse}>
+            <ViewMoreText
+              style={{ flex: 1 }}
+              numberOfLines={2}
+              renderViewMore={this.renderViewMore}
+              renderViewLess={this.renderViewLess}
+              // textStyle={{textAlign: 'center'}}
+            >
+              <Thumbnail source={require("../../assets/user.jpeg")} />
+
+              <Text style={{ fontSize: 18 }}>
+                {"\t\t"}
+                {this.state.customerData.Name}
+                {"\n"}
+                {"\t\t\t\t\t\t\t"}
+                {"\n\n"}
+                <Text style={{ flex: 1, fontSize: 15, minWidth: "100%" }}>
+                  {keys.map((information, index) => {
+                    if (typeof this.state.customerData[information] == "string")
+                      return (
+                        information.replace("__c", "").replace("_", " ") +
+                        " : " +
+                        this.state.customerData[information] +
+                        "\n"
+                      );
+                  })}
+                </Text>
+              </Text>
+
+              {/* <Text>
+                  {"\n"}Registered Name : {HeaderName} {"\n"}
+                  Customer Id : 32483 {"\n"}
+                  Age : 80 {"\n"}
+                  Phone Number : 1234567890 {"\n"}
+                  Address : Akola
+                </Text> */}
+            </ViewMoreText>
+          </View>
+          <View style={{ marginTop: "5%" }}>
+            <Tabs>
+              <Tab
+                heading="QE Details"
+                tabStyle={{ backgroundColor: "#E31837" }}
+                activeTabStyle={{ backgroundColor: "#C31837" }}
+                activeTextStyle={{ fontWeight: "bold", color: "white" }}
+                textStyle={{ color: "white" }}
+              >
+                <View
+                  style={{
+                    borderWidth: 1,
+                    margin: "5%",
+                    borderColor: "#00000000",
+                    borderRadius: 10,
+                    elevation: 1,
+                    backgroundColor: "#E3DFCE",
+                  }}
+                >
+                  <View
+                    style={{ marginHorizontal: "10%", paddingVertical: "5%" }}
+                  >
+                    <Text style={styles.textStyle}>
+                      Segment :{" "}
+                      <Text style={styles.textColor}>
+                        {this.state.customerData.Segment__c}
+                      </Text>
+                    </Text>
+                    <Text style={styles.textStyle}>
+                      Likely Purchase :
+                      <Text style={styles.textColor}>
+                        {" "}
+                        {this.state.customerData.Likely_Purchase__c}
+                      </Text>
+                    </Text>
+                    <Text style={styles.textStyle}>
+                      Enquiry Type :{" "}
+                      <Text style={styles.textColor}>
+                        {this.state.customerData.Enquiry_Type__c}
+                      </Text>
+                    </Text>
+                    <Text style={styles.textStyle}>
+                      Enquiry Source :{" "}
+                      <Text style={styles.textColor}>
+                        {this.state.customerData.Enquiry_Source__c}
+                      </Text>
+                    </Text>
+                  </View>
+                </View>
+              </Tab>
+              <Tab
+                heading="P Interest"
+                tabStyle={{ backgroundColor: "#E31837" }}
+                activeTabStyle={{ backgroundColor: "#C31837" }}
+                activeTextStyle={{ fontWeight: "bold", color: "white" }}
+                textStyle={{ color: "white" }}
+              >
+                <View
+                  style={{
+                    borderWidth: 1,
+                    margin: "5%",
+                    borderColor: "#00000000",
+                    borderRadius: 10,
+                    elevation: 1,
+                    backgroundColor: "#E3DFCE",
+                  }}
+                >
+                  <View
+                    style={{ marginHorizontal: "10%", paddingVertical: "5%" }}
+                  >
+                    <View style={{ flexDirection: "row" }}>
+                      <Text
+                        style={{ flex: 1, fontSize: 16, fontWeight: "bold" }}
+                      >
+                        Product
+                      </Text>
+                      <Text
+                        style={{ flex: 1, fontSize: 16, fontWeight: "bold" }}
+                      >
+                        Interest Category
+                      </Text>
+                    </View>
+                    {this.state.productData.map((data) => {
+                      console.log("!!!!!!!!!!!!!" + data.Product_Family_Text__c);
+                      <View style={{ flexDirection: "row", paddingTop: "5%" }}>
+                        <Text style={{ flex: 1 }}>{data.Product_Family_Text__c}</Text>
+                        <Text style={{ flex: 1 }}>{data.Interest_Category__c}</Text>
+                      </View>
+                    })}
+                  </View>
+                </View>
+              </Tab>
+              <Tab
+                heading="Followup"
+                tabStyle={{ backgroundColor: "#E31837" }}
+                activeTabStyle={{ backgroundColor: "#C31837" }}
+                activeTextStyle={{ fontWeight: "bold", color: "white" }}
+                textStyle={{ color: "white" }}
+              >
+                 {this.state.productData != null && (
+              <ScrollableTabView
+                refreshControlStyle={{ backgroundColor: "red" }}
+                prerenderingSiblingsNumber={5}
+                tabBarInactiveTextColor="gray"
+                locked={true}
+                renderTabBar={() => <ScrollableTabBar />}
+              >
+                {this.state.productData.map(
+                  (product, index) => {
+                    return (
+                      <ScrollView
+                        tabLabel={product.Product_Family_Text__c}
+                        key={product.Id}
+                      >
+                        <Timelinee
+                          enquiryId={this.state.id}
+                          tasks={
+                            this.state.customerData.Tasks
+                              ? this.state.customerData.Tasks.records
+                              : []
+                          }
+                          Product2Id={product.Product_Family_Text__c}
+                          showFollowupDetails={this.showFollowupDetails}
+                        />
+                      </ScrollView>
+                    );
+                  }
+                )}
+              </ScrollableTabView>
+            )}
+              </Tab>
+            </Tabs>
+          </View>
+        </Content>
+        <FAB.Group
+          fabStyle={{ backgroundColor: "#E31837" }}
+          open={this.state.open}
+          actions={[
+            {
+              icon: "car",
+              label: "Add Product Interest",
+              color: "#E31837",
+              onPress: () => console.log("Pressed test drive"),
+            },
+            {
+              icon: "notebook",
+              label: "Add Followup",
+              color: "#E31837",
+              onPress: () => {
+                this.props.navigation.navigate("Booking");
+              },
+            },
+            {
+              icon: "check",
+              label: "TD Now",
+              color: "#E31837",
+              onPress: () => {
+                this.props.navigation.navigate("Quotation");
+              },
+            },
+            {
+              icon: "plus-circle",
+              label: "Convert Into Enquiry",
+              color: "#E31837",
+              onPress: () => console.log("Pressed new product"),
+            },
+          ]}
+          icon="plus"
+          //  onPress={() => this.props.navigation.navigate('Registration')}
+          onStateChange={({ open }) => this.setState({ open })}
+          onPress={() => {
+            if (this.state.open) {
+              // do something if the speed dial is open
+            }
+          }}
+        />
+      </Container>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  header: {
+    backgroundColor: "#E31837",
+  },
+  dropDownTextLabel: {
+    color: "gray",
+    fontSize: 12,
+  },
+  collapse: {
+    marginLeft: 20,
+  },
+  showMoreButton: {
+    width: 140,
+    justifyContent: "center",
+    alignSelf: "flex-end",
+    marginTop: 5,
+    backgroundColor: "#e53144",
+  },
+  showLessButton: {
+    width: 140,
+    justifyContent: "center",
+    alignSelf: "flex-end",
+    marginTop: 5,
+    backgroundColor: "#e53144",
+  },
+  CustomerName: {
+    fontSize: 20,
+    fontFamily: "sance-serif",
+    fontWeight: "bold",
+  },
+
+  inputs: {
+    marginBottom: 20,
+  },
+  modal: {
+    alignSelf: "center",
+    backgroundColor: "lightgrey",
+    height: "60%",
+    width: "80%",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#fff",
+    marginTop: "10%",
+  },
+  Task: {
+    alignSelf: "center",
+    backgroundColor: "#fafafa",
+    shadowColor: "gray",
+    height: "auto",
+    width: "99%",
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "lightgray",
+    padding: 10,
+  },
+  text: {
+    color: "#333333",
+    marginTop: 10,
+  },
+  textStyle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    paddingVertical: "4%",
+  },
+  textColor: {
+    fontWeight: "normal",
+  },
+});

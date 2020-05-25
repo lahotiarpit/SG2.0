@@ -1,0 +1,120 @@
+{
+    "totalSize": 6,
+    "done": true,
+    "records": [
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EKzDQAW"
+        },
+        "Id": "01u5D000006EKzDQAW",
+        "Name": "Test RSA 2",
+        "UnitPrice": 98741,
+        "Product2Id": "01t5D000002dwkRQAQ",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002dwkRQAQ"
+          },
+          "Type__c": "RSA",
+          "Name": "Test RSA 2",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      },
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EKz8QAG"
+        },
+        "Id": "01u5D000006EKz8QAG",
+        "Name": "Test RSA",
+        "UnitPrice": 7410,
+        "Product2Id": "01t5D000002dn6HQAQ",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002dn6HQAQ"
+          },
+          "Type__c": "RSA",
+          "Name": "Test RSA",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      },
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EKyyQAG"
+        },
+        "Id": "01u5D000006EKyyQAG",
+        "Name": "Test Shield",
+        "UnitPrice": 12334,
+        "Product2Id": "01t5D000002dn6CQAQ",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002dn6CQAQ"
+          },
+          "Type__c": "Shield",
+          "Name": "Test Shield",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      },
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EKz3QAG"
+        },
+        "Id": "01u5D000006EKz3QAG",
+        "Name": "Test Shield 2",
+        "UnitPrice": 3214,
+        "Product2Id": "01t5D000002dwkMQAQ",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002dwkMQAQ"
+          },
+          "Type__c": "Shield",
+          "Name": "Test Shield 2",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      },
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EMIcQAO"
+        },
+        "Id": "01u5D000006EMIcQAO",
+        "Name": "Test Acc 1",
+        "UnitPrice": 3210,
+        "Product2Id": "01t5D000002e1IVQAY",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002e1IVQAY"
+          },
+          "Type__c": "Accessories",
+          "Name": "Test Acc 1",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      },
+      {
+        "attributes": {
+          "type": "PricebookEntry",
+          "url": "/services/data/v46.0/sobjects/PricebookEntry/01u5D000006EN35QAG"
+        },
+        "Id": "01u5D000006EN35QAG",
+        "Name": "Test Acc 2",
+        "UnitPrice": 456321,
+        "Product2Id": "01t5D000002e1IaQAI",
+        "Product2": {
+          "attributes": {
+            "type": "Product2",
+            "url": "/services/data/v46.0/sobjects/Product2/01t5D000002e1IaQAI"
+          },
+          "Type__c": "Accessories",
+          "Name": "Test Acc 2",
+          "Parent_Product__c": "01t5D000002cKdcQAE"
+        }
+      }
+    ]
+  }
