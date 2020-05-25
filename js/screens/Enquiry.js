@@ -55,6 +55,7 @@ import {
   smartstore,
 } from "react-native-force";
 import EnquiryModel from "../soups/EnquiryModel";
+import RadioChip  from '../app-shared/RadioChip/index';
 
 //const upsertSoupEntries = forceUtil.promiser(smartstore.upsertSoupEntries);
 
@@ -1399,6 +1400,7 @@ class Enquiry extends Component {
                     <Chip style={styles.chipInput}  onPress={() => this.setState({  })}>Dr.</Chip>
                     
                   </Row>
+                  <RadioChip options={[{text:"Mr"}, {text:"Mrs"}, {text:"Ms"}]}/>
                   <TextInput
                     style={styles.inputs}
                     type="outlined"

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import { times } from 'lodash';
 
 import StepIcon from './StepIcon';
+import ProgressHeader from './ProgressHeader';
 
 class ProgressSteps extends Component {
   state = {
@@ -19,27 +20,27 @@ class ProgressSteps extends Component {
   }
 
   renderStepIcons = () => {
-    let step = [];
-
-    times(this.state.stepCount, i => {
-      step.push(
-        <View key={i}>
-          <View>
-            <StepIcon
-              {...this.getChildProps()}
-              stepNum={i + 1}
-              label={this.props.children[i].props.label}
-              isFirstStep={i === 0}
-              isLastStep={i === this.state.stepCount - 1}
-              isCompletedStep={i < this.state.activeStep}
-              isActiveStep={i === this.state.activeStep}
-            />
-          </View>
-        </View>
-      );
-    });
-
-    return step;
+    /*
+    stepNum={i + 1}
+    label={this.props.children[i].props.label}
+    isFirstStep={i === 0}
+    isLastStep={i === this.state.stepCount - 1}
+    isCompletedStep={i < this.state.activeStep}
+    isActiveStep={i === this.state.activeStep}
+    */  
+   return (
+    <ProgressHeader 
+      totalSteps={this.state.stepCount}
+      activeStep={this.state.activeStep}
+      circleRadius={28}
+      circleBorderWidth={6}
+      circleProgressColor={'green'}
+      circleShadowColor={'#E62C36'}
+      circleBgColor={'#fff'}
+      stepLabel={this.props.children[this.state.activeStep].props.label}
+      nextStepLabel={this.props.children[this.state.activeStep + 1].props.label}
+    />
+   ) 
   };
 
   // Callback function from ProgressStep that passes current step.
