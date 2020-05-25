@@ -34,6 +34,8 @@ import { ScrollView } from "react-native-gesture-handler";
 
 import QuickEnquiryOnSearch from "../screens/QuickEnquiryOnSearch";
 import QECustomer360 from "../screens/QECustomer360";
+
+
 class QuickEnquiry extends Component {
   constructor(props) {
     super(props);
@@ -132,13 +134,13 @@ class QuickEnquiry extends Component {
     return (
       <Container>
         <Header
-          style={{ backgroundColor: "#999999" }}
+          style={{ backgroundColor: "#333333" }}
           androidStatusBarColor="#A31837"
         >
           <Left>
             <Button
               transparent
-              style={{ backgroundColor: "#999999" }}
+              style={{ backgroundColor: "#333333" }}
               onPress={() => this.props.navigation.goBack()}
             >
               <Icon name="md-arrow-back" style={{ color: "white" }} />
@@ -148,8 +150,8 @@ class QuickEnquiry extends Component {
             <Title
               style={{
                 color: "white",
-                fontFamily: "Poppins-Bold",
-                fontWeight: "bold",
+                fontFamily: "Poppins-Regular",
+                fontWeight: "600",
               }}
             >
               Quick Enquiry
@@ -157,98 +159,108 @@ class QuickEnquiry extends Component {
           </Body>
           <Right />
         </Header>
-        <View
-          style={{
-            borderWidth: 1,
-            margin: "5%",
-            borderColor: "#00000000",
-            borderRadius: 10,
-            elevation: 1,
-            backgroundColor: "#F2F3F4",
-          }}
-        >
-          <View style={{ marginHorizontal: "10%", paddingTop: "5%" }}>
-            <Label>Segment : </Label>
-          </View>
-          <View style={{ border: 20, margin: 20, flexDirection: "row" }}>
-            <Row style={{ alignItems: "center", flex: 1 }}>
-              <RadioButton
-                color="black"
-                value="second"
-                status={checked === "Personal" ? "checked" : "unchecked"}
-                onPress={() => {
-                  this.setState({ checked: "Personal" });
-                }}
-              />
-              <Label>Personal</Label>
+        <View style={styles.bigcard}>
+          <View style={{ marginBottom: "5%", paddingTop: "3%" }}>
+            <Text style={styles.title}>Search with</Text>
+          
+            <View style={{ border: 10, margin: 5, flexDirection: "row" }}>
+              <Row style={{ alignItems: "center", flex: 1 }}>
+                <RadioButton
+                  color="black"
+                  value="second"
+                  status={checked === "Personal" ? "checked" : "unchecked"}
+                  onPress={() => {
+                    this.setState({ checked: "Personal" });
+                  }}
+                />
+                <Label>Personal</Label>
 
-              <RadioButton
-                color="black"
-                value="second"
-                status={checked === "Commercial" ? "checked" : "unchecked"}
-                onPress={() => {
-                  this.setState({ checked: "Commercial" });
+                <RadioButton
+                  color="black"
+                  value="second"
+                  status={checked === "Commercial" ? "checked" : "unchecked"}
+                  onPress={() => {
+                    this.setState({ checked: "Commercial" });
+                  }}
+                />
+                <Label>Commercial</Label>
+              </Row>
+            </View>
+            <View style={{ border: 10, margin: 5, flexDirection: "row" }}>
+              <Row style={{ alignItems: "center", flex: 1 }}>
+                <RadioButton
+                  color="black"
+                  value="second"
+                  status={checked === "Personal" ? "checked" : "unchecked"}
+                  onPress={() => {
+                    this.setState({ checked: "Personal" });
+                  }}
+                />
+                <Label>Number</Label>
+
+                <RadioButton
+                  color="black"
+                  value="second"
+                  status={checked === "Commercial" ? "checked" : "unchecked"}
+                  onPress={() => {
+                    this.setState({ checked: "Commercial" });
+                  }}
+                />
+                <Label>Name</Label>
+              </Row>
+            </View>
+            <View style={{ marginHorizontal: "5%" }}>
+              <TextInput
+                style={{
+                  borderColor: "#000000",
+                  borderRadius:10,
+                  height: 40,
+                  width:"100%",
+                  backgroundColor: "white",
+                  paddingLeft: 20,
+                  color: "black",
+                  borderWidth: 0,
+                }}
+                placeholder="Search Name / Number"
+                placeholderTextColor="grey"
+                value = {this.state.nameOrMobilNumber}
+                onChangeText={(nameOrMobilNumber) => {
+                  this.setState({ nameOrMobilNumber });
                 }}
               />
-              <Label>Commercial</Label>
-            </Row>
+            </View>
+            <Button
+                style={{
+                  marginLeft:"35%",
+                  marginTop:10,
+                  backgroundColor: "#E92D46",
+                  borderRadius:10,
+                  height: 35,
+                  width:90,
+                  alignItems: "center",
+                  alignContent:"center"
+
+                }}
+                onPress={this.SearchMobilePhoneOrName}
+              >
+                <Text styles={styles.search}>SEARCH</Text>
+                {this.state.isLoading == true ? (
+                  <ActivityIndicator
+                    style={{ margin: "3%" }}
+                    color="#E31837"
+                    size="small"
+                    animating
+                  />
+                ) : (
+                  <Text styles={styles.search}>SEARCH</Text>
+                )}
+              </Button>
           </View>
         </View>
 
-        <View style={{ flexDirection: "row", marginHorizontal: "5%" }}>
-          <TextInput
-            style={{
-              borderColor: "grey",
-              borderTopLeftRadius: 20,
-              borderBottomLeftRadius: 20,
-              height: 40,
-              backgroundColor: "#F2F3F4",
-              paddingLeft: 20,
-              width: "85%",
-              color: "black",
-              borderWidth: 0,
-            }}
-            placeholder="Search Name / Number"
-            placeholderTextColor="grey"
-            value = {this.state.nameOrMobilNumber}
-            onChangeText={(nameOrMobilNumber) => {
-              this.setState({ nameOrMobilNumber });
-            }}
-          />
+        
 
-          <Button
-            style={{
-              backgroundColor: "#E3DFCE",
-              borderTopRightRadius: 20,
-              borderBottomRightRadius: 20,
-              height: 40,
-            }}
-            onPress={this.SearchMobilePhoneOrName}
-          >
-            {this.state.isLoading == true ? (
-              <ActivityIndicator
-                style={{ margin: "3%" }}
-                color="#E31837"
-                size="small"
-                animating
-              />
-            ) : (
-              <Icon name="search" style={{ color: "black" }} />
-            )}
-          </Button>
-        </View>
-
-        <View
-          style={{
-            borderWidth: 1,
-            margin: "5%",
-            borderColor: "#00000000",
-            borderRadius: 10,
-            elevation: 1,
-            backgroundColor: "#F2F3F4",
-            paddingBottom: "10%",
-          }}
-        >
+        <View style={styles.bigcard}>
 
           <View style={{ marginHorizontal: "5%", paddingTop: "5%" }}>
             <Label style={styles.header}>RECENT QUICK ENQUIRY</Label>
@@ -313,14 +325,14 @@ const styles = StyleSheet.create({
   EnquiryOverallView: {
     flex: 1,
   },
-  header: { textAlign:"center", alignItems:"center", fontSize: 18, fontFamily: "Poppins-Medium" , color : "#333333" },
+  header: { textAlign:"center", alignItems:"center", fontSize: 18, fontFamily: "Poppins-Regular" , fontWeight: "600",color : "#333333" },
   rectangle :{
     backgroundColor:'#FF9933',
     borderColor: 'white',
     width:25,	height:80,
   }, 
   followup:{
-    textAlign:"right", marginTop: "3%", fontSize: 12, color:"#ED1C24" , fontFamily: "Poppins-Semibold"
+    textAlign:"right", marginTop: "3%", fontSize: 12, color:"#ED1C24" , fontFamily: "Poppins-Regular"
   },
   record:{ 
     marginTop: "3%", height : 80, zIndex:99, width:"100%", backgroundColor: "#FFFFFF",
@@ -331,10 +343,38 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   heading:{ 
-    marginLeft: "10%", fontWeight: "600", width:110, fontSize: 20, color:"#000000" , fontFamily: "Poppins-Semibold"
+    marginLeft: "10%", fontWeight: "400", width:110, fontSize: 18, color:"#000000" , fontFamily: "Poppins-Regular"
   },
   subheading:{ 
-    marginLeft: "10%", fontWeight: "600", fontSize: 16, color:"#999999", fontFamily: "Poppins-Medium" 
+    marginLeft: "10%", fontWeight: "400", fontSize: 14, color:"#999999", fontFamily: "Poppins-Regular" 
+  },
+
+  title : {
+    marginTop:"3%",
+    fontFamily : 'Poppins-Regular',
+    fontWeight:"400",
+    fontSize: 16,
+    textAlign:"center",
+    textTransform: 'uppercase'
+  }, 
+
+  bigcard:{
+    borderWidth: 1,
+    margin: "3%",
+    marginTop:"5%",
+    borderColor: "#F2F3F4",
+    borderRadius: 10,
+    elevation: 1,
+    backgroundColor: "#F2F3F4",
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,
+  }, 
+
+  search:{
+    marginLeft: "10%", fontWeight: "400", width:110, fontSize: 18, color:"#FFFFFF" , fontFamily: "Poppins-Regular"
   }
 });
 export default QuickEnquiry;

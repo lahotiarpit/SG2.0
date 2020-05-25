@@ -12,19 +12,21 @@ class RadioChip extends Component {
 
   render(){
     const { selectedOption } = this.state;
-    const { options } = this.props;
+    const { options, onValueChange } = this.props;
+
     return(
         <View style={styles.container}>
             {
                 options.map((option, index) => 
                 <Chip 
-                    selected={selectedOption === option.text}
+                    selected={selectedOption === option.label}
                     onChange={() => {
                         this.setState({
-                            selectedOption: option.text
+                            selectedOption: option.label
                         });
+                        onValueChange(option.value);
                     }}
-                    optionText={option.text}
+                    optionText={option.label}
                 />   
                 )
             }
@@ -36,6 +38,7 @@ class RadioChip extends Component {
 const styles = StyleSheet.create({
     container:{
       flexDirection: "row",
+      flexWrap:"wrap",
       marginTop: 10,
       marginBottom:10
     },

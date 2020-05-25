@@ -18,7 +18,7 @@ class Chip extends Component {
         return(
             <TouchableOpacity onPress={this.onPressHandler}>
                 <View style={[styles.chip, selected && styles.selected]}>
-                    <Text>{optionText}</Text>
+                    <Text style = {styles.text, selected && styles.selected}>{optionText}</Text>
                 </View>
             </TouchableOpacity>            
         );
@@ -26,19 +26,28 @@ class Chip extends Component {
   
 }
 const styles = StyleSheet.create({
+    text:{
+        textTransform: 'uppercase',
+        fontFamily : 'Poppins-Regular',
+        fontWeight:"400",
+        fontSize: 12,
+        },
     chip: {
-        paddingLeft: 20,
-        paddingRight: 20,
-        paddingTop: 8,
-        paddingBottom: 8,
-        borderColor: '#999999',
+        paddingLeft: 15,
+        paddingRight: 15,
+        paddingTop: 5,
+        paddingBottom: 5,
+        borderColor: '#333333',
         borderWidth: 1,
         marginRight: 15,
+        marginTop: 5,
+        marginBottom:5,
         borderRadius: 20,
-        color: '#B3B3B3'
+        color: '#333333',
     },
     selected: {
-        borderColor: '#CC1D3A'
+        borderColor: '#E92D46',
+        color: '#E92D46',
     }
 });
 

@@ -42,9 +42,11 @@ const ProgressHeader = ({
           <Text style={styles.progressSection}>
             {stepLabel}
           </Text>
-          <Text style={styles.progressSectionNext}>
-            Next: {nextStepLabel}
-          </Text>
+          {((activeStep + 1) < totalSteps) && 
+            <Text style={styles.progressSectionNext}>
+              Next: {nextStepLabel}
+            </Text>
+          }
         </View>
     </View>
   );
@@ -62,20 +64,20 @@ const styles = StyleSheet.create({
     },
     percentText: {
       fontSize: 11,
-      color: '#E62C36'
+      color: '#000000'
     },
     progressHeaderCont: {
       paddingLeft: 15
     },
     progressSection: {
-      color: '#E62C36',
-      fontSize: 18,
+      color: '#000000',
+      fontSize: 22,
       fontWeight: 'bold',
-      fontFamily: 'Poppins-Italic'
+      fontFamily: 'Poppins-Medium'
     },
     progressSectionNext: {
-      color: '#E62C36',
-      fontSize: 11
+      color: '#000000',
+      fontSize: 16
     }
 });
 

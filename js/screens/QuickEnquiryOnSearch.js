@@ -4,7 +4,6 @@ import {
   Card,
   Title,
   Paragraph,
-  TextInput,
   RadioButton,
   ActivityIndicator,
 } from "react-native-paper";
@@ -31,6 +30,7 @@ import {
   Alert,
   Modal,
   ScrollView,
+  TextInput,
   TimePickerAndroid,
 } from "react-native";
 
@@ -46,6 +46,7 @@ import enquiryPickList from "../PicklistHelpers/EnquiryPickListHelper";
 import enquiryProduct2PickListHelper from "../PicklistHelpers/EnquiryProduct2PickListHelper";
 import taskPickList from "../PicklistHelpers/TaskPickListHelper";
 import quickEnqsEnquiryTypeAndSourcePickList from "../PicklistHelpers/QuickEnqsEnquiryTypeAndSourcePickList";
+import RadioChip  from '../app-shared/RadioChip/index';
 
 import {
   forceUtil,
@@ -70,49 +71,26 @@ class QuickEnquiryOnSearch extends Component {
       showLoading: false,
       check: false,
       chosenDate: "",
-      checked: "first",
-      checkedLikelyPurchase: "LT15",
+      
+      Salutation:"",
       FirstName: "",
       LastName: "",
-      Age: "",
       Email: "",
-      //ReferByName: "",
-      MobileNumber: "",
-      //ReferralMobileNumber: "",
+      MobilePhone: "",
+      
       Enquirytype: "",
       EnquirySource: "",
-      SubSource: "",
+      EnquirySubSource: "",
       LikelyPurchase: "",
+      
       enquiryTab3Err: false,
-      //Quantity: "",
-      //next: false,
       UsageArea: "",
       ProductName: "",
       dealerC: "",
-      Variant: "",
-      Color: "",
-      FuelType: "",
-      SeatCapacity: "",
+      
+      
       showAddDetails: false,
-      //TransmissionType: "",
-      //isValid: false,
-      //errors: false,
-      postalCodeValidate: "",
-      stateValidate: "",
-      cityValidate: "",
-      streetValidate: "",
-      ProspectType: "",
-      ProspectTypeLabel: "",
-      State: "",
-      City: "",
-      PostalCode: "",
-      Country: "",
-      Street: "",
-      name: "",
-      lastName: "",
-      age: "",
-      email: "",
-      mobileNumber: "",
+      
       err: false,
       NextFollowUpActions: "",
       //isDisabled: false,
@@ -122,9 +100,13 @@ class QuickEnquiryOnSearch extends Component {
 
       //  Add Vehicle
       chooseModel: "",
-      quantity: "1",
+      Quantity: "1",
       interest: "",
       primaryInterestModel: "",
+      Variant: "",
+      Color: "",
+      FuelType: "",
+      SeatCapacity: "",
 
       //  Followup
       subject: "",
@@ -143,6 +125,7 @@ class QuickEnquiryOnSearch extends Component {
       Prospect_Type__c: [],
       Likely_Purchase__c: [],
       Enquiry_Source__c: [],
+      Enquiry_Sub_Source__c: [],
       Enquiry_Type__c: [],
       Usage_Area__c: [],
 
@@ -157,20 +140,23 @@ class QuickEnquiryOnSearch extends Component {
 
       isEnquirySourceLoading: false,
       enquirySourceList: undefined,
+      isEnquirySubSourceLoading: false,
+      enquirySubSourceList : undefined,
 
       ownerId: undefined,
       AccessToken: undefined,
 
+      quickEnquirySalutation : [],
       quickEnquiryTypeData: [],
       quickEnquirySourceData: [],
       quickEnquirySubSourceData: [],
       quickEnquiryLikelyPurchase: [],
 
       QEInformationStepHasError: true,
-      personalDetailsStepHasError: true,
-      productStepHasError: true,
+      //personalDetailsStepHasError: true,
+      //productStepHasError: true,
       //   enquiryStepHasError: true,
-      //   followUpStepHasError: true
+      followUpStepHasError: true
     };
 
     // .....FOR FOCUSING TO NEXT TEXTINPUT.....
@@ -209,7 +195,7 @@ class QuickEnquiryOnSearch extends Component {
     } else if (!this.state.EnquirySource) {
       alert("Please select Enquiry Source");
       return;
-    } else if (!this.state.SubSource) {
+    } else if (!this.state.EnquirySubSource) {
       alert("Please select Enquiry Sub Source");
       return;
     }
@@ -261,16 +247,14 @@ class QuickEnquiryOnSearch extends Component {
   };
 
   validateFollowUpStep = () => {
+    alert('In submit');
     if (!this.state.type) {
       alert("Please provide Type");
       return;
-    } else if (!this.state.model) {
-      alert("Please provide Model");
+    }else if (!this.state.chosenDate) {
+      alert("Please provide a Date");
       return;
-    } else if (!this.state.chosenDate) {
-      alert("Please provide a Call date");
-      return;
-    } else {
+    }else {
       this.setState({ followUpStepHasError: false });
       this.onEnquirySubmit();
     }
@@ -339,11 +323,13 @@ class QuickEnquiryOnSearch extends Component {
       TaskStatus: taskData.Status__c,
 
       quickEnquiryTypeData: quickEnquiryTypeAndSource.Enquiry_Type__c,
-      quickEnquirySourceData: quickEnquiryTypeAndSource.Enquiry_Source__c,
-      quickEnquirySubSourceData: quickEnquiryTypeAndSource.Sub_Source__c,
+      quickEnquirySalutation : quickEnquiryTypeAndSource.Salutation,
+      //quickEnquirySourceData: quickEnquiryTypeAndSource.Enquiry_Source__c,
+      //quickEnquirySubSourceData: quickEnquiryTypeAndSource.Sub_Source__c,
       quickEnquiryLikelyPurchase: quickEnquiryTypeAndSource.Likely_Purchase__c,
     });
-
+    
+                      
     //To getting values for modal in Product (Add Vehicle)
     net.query(
       "SELECT Name FROM Product2 WHERE Segment_Code__c= '" +
@@ -384,15 +370,15 @@ class QuickEnquiryOnSearch extends Component {
   }
   // ----------------------------------------------------------
 
-  DropdownSubSource(value) {
-    this.setState({
-      SubSource: value,
-    });
-  }
-
   DropdownLikelyPurchase(value) {
     this.setState({
       LikelyPurchase: value,
+    });
+  }
+
+  setSalutation(value) {
+    this.setState({
+      Salutation: value,
     });
   }
 
@@ -430,32 +416,23 @@ class QuickEnquiryOnSearch extends Component {
     this.setState({ chosenDate: newDate });
   }
 
-  DropdownQuickEnquiryType(value) {
-    if (this.state.enquirySourceList == undefined) {
-      this.fetchQuickEnquirySourceList(
-        this.state.ownerId,
-        this.state.accessToken
-      );
+  DropdownEnquiryType(value) {
+    this.setState({ EnquiryType: value});
+    if(this.state.enquirySourceList == undefined) {
+      this.fetchEquirySourceList(this.state.ownerId, this.state.accessToken, value);
+
     } else {
       if (value) {
         this.setState({
-          EnquiryType: value,
-          EnquirySource: "",
-          Enquiry_Source__c: this.state.enquirySourceList[value]
-            ? this.state.enquirySourceList[value]
-            : [],
+          EnquirySource: '',
+          Enquiry_Source__c: this.state.enquirySourceList[value] ? this.state.enquirySourceList[value] : []
         });
-      } else {
-        this.setState({
-          EnquiryType: value,
-          EnquirySource: "",
-          Enquiry_Source__c: [],
-        });
+        
       }
     }
   }
 
-  fetchQuickEnquirySourceList = (ownerId, accessToken) => {
+  fetchEquirySourceList = (ownerId, accessToken, value) => {
     let usable_access_token = accessToken;
     let salesConsultantIds = [];
     salesConsultantIds.push(ownerId);
@@ -473,7 +450,7 @@ class QuickEnquiryOnSearch extends Component {
         this.setState({
           isEnquirySourceLoading: false,
           enquirySourceList: responseData,
-          //  Enquiry_Source__c: value ? responseData[value] : [] //NAVAL OPEN IT WHEN THE TEAM COMPLETES ITS JOB
+          Enquiry_Source__c: value ? responseData[value] : [] 
         });
       },
       (err) => {
@@ -541,11 +518,60 @@ class QuickEnquiryOnSearch extends Component {
       });
     }
   }
+  
 
   DropdownEnquirySource(value) {
+    this.setState({ EnquirySource: value});
+    if(this.state.enquirySubSourceList == undefined) {
+      this.fetchEquirySubSourceList(this.state.ownerId, this.state.accessToken, value);
+    } else {
+      if (value) {
+        this.setState({
+          EnquirySubSource: '',
+          Enquiry_Sub_Source__c: this.state.enquirySubSourceList[value] ? this.state.enquirySubSourceList[value] : []
+        });
+      }
+    }
+  }
+
+  fetchEquirySubSourceList = (ownerId, accessToken, value) => {
+    let usable_access_token = accessToken;
+    let salesConsultantIds = [];
+    salesConsultantIds.push(ownerId);
+
     this.setState({
-      EnquirySource: value,
+      isEnquirySubSourceLoading: true,
     });
+
+    net.sendRequest(
+      "/services/apexrest/getDependentPicklistValues",
+      "getDependentPicklistValues",
+      (res) => {
+        let responseData = JSON.parse(res);
+        console.log(responseData);
+        this.setState({
+          isEnquirySubSourceLoading: false,
+          enquirySubSourceList: responseData,
+          Enquiry_Sub_Source__c: value ? responseData[value] : [] //NAVAL OPEN IT WHEN THE TEAM COMPLETES ITS JOB
+        });
+      },
+      (err) => {
+        console.log("error - " + JSON.stringify(err));
+      },
+      "POST",
+      { dependentString: "Lead.Enquiry_Sub_Source__c" },
+      {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + usable_access_token,
+      },
+      null,
+      null,
+      false
+    );
+  }
+
+  DropdownEnquirySubSource(value){
+    this.setState({ EnquirySubSource: value});
   }
 
   DropdownAge(value) {
@@ -704,12 +730,12 @@ class QuickEnquiryOnSearch extends Component {
       FirstName: this.state.FirstName,
       LastName: this.state.LastName,
       Email: this.state.Email,
-      MobilePhone: this.state.MobileNumber,
+      MobilePhone: this.state.MobilePhone,
       Segment__c: this.state.Segment,
       Enquiry_Type__c: this.state.EnquiryType,
       Enquiry_Source__c: this.state.EnquirySource,
-      Sub_Source__c: this.state.SubSource,
-      Likely_Purchase__c: this.state.checkedLikelyPurchase,
+      Enquiry_Sub_Source__c: this.state.EnquirySubSource,
+      Likely_Purchase__c: this.state.LikelyPurchase,
 
       attributes: { type: Lead.salesForceName },
 
@@ -759,18 +785,14 @@ class QuickEnquiryOnSearch extends Component {
       let enquiryModelsToAdd = Object.keys(this.state.addListOfModel).map(
         (model) => {
           return {
-            Product_Family_Text__c: this.state.addListOfModel[model].model,
-            Interest_Category__c:
-              this.state.primaryInterestModel ==
-              this.state.addListOfModel[model].model
-                ? "Primary_Interest"
-                : "Other_Interest",
-            Quantity__c: this.state.addListOfModel[model].qty,
+            Product_Family_Text__c: this.state.chooseModel,
+            Interest_Category__c: "Primary_Interest",
+            Quantity__c: this.state.Quantity,
             Lead__c: QuickEnquiryId,
-            Product_Family_Variant__c: this.state.addListOfModel[model].Variant,
-            Vehicle_Colors__c: this.state.addListOfModel[model].Color,
-            Seating_Capacity_Text__c: this.state.addListOfModel[model].SeatCapacity,
-            Fuel_Type_Text__c: this.state.addListOfModel[model].FuelType,
+            Product_Family_Variant__c: this.state.Variant,
+            Vehicle_Colors__c: this.state.Color,
+            Seating_Capacity_Text__c: this.state.SeatCapacity,
+            Fuel_Type_Text__c: this.state.FuelType,
 
             attributes: { type: EnquiryModel.salesForceName },
 
@@ -816,7 +838,7 @@ class QuickEnquiryOnSearch extends Component {
       let followupTask = {
         // Subject: this.state.subject,
         Subject: this.state.type,
-        Product_Family__c: this.state.model,
+        Product_Family__c: this.state.chooseModel,
 
         WhoId: QuickEnquiryId,
 
@@ -927,13 +949,13 @@ class QuickEnquiryOnSearch extends Component {
     return (
       <View style={styles.EnquiryOverallView}>
         <Header
-          style={{ backgroundColor: "#E31837" }}
+          style={{ backgroundColor: "#333333" }}
           androidStatusBarColor="#A31837"
         >
           <Left>
             <Button
               transparent
-              style={{ backgroundColor: "#E31837" }}
+              style={{ backgroundColor: "#333333" }}
               onPress={() => this.props.navigation.goBack()}
             >
               <Icon name="md-arrow-back" style={{ color: "white" }} />
@@ -943,8 +965,8 @@ class QuickEnquiryOnSearch extends Component {
             <Title
               style={{
                 color: "white",
-                fontFamily: "barlow",
-                fontWeight: "bold",
+                fontFamily: "Poppins-Medium",
+                fontWeight: "400",
               }}
             >
               Create Quick Enquiry
@@ -953,701 +975,95 @@ class QuickEnquiryOnSearch extends Component {
           
         </Header>
         <ProgressSteps
-          //activeStep='4'
           disabledStepNumColor="black"
           style={styles.ProgressSteps}
         >
           <ProgressStep
-            label="QE Info"
+            label="Quick Enquiry Details"
             onNext={this.validateQEInformationStep}
             errors={this.state.QEInformationStepHasError}
           >
             <View style={styles.EnquiryProgressStepForUser}>
-              <View
-                style={{
-                  borderWidth: 1,
-                  margin: "5%",
-                  borderColor: "#00000000",
-                  borderRadius: 10,
-                  elevation: 1,
-                  backgroundColor: "#E3DFCE",
-                }}
-              >
+              <View style={styles.bigcard}> 
+                <Text style={styles.title}>QUICK ENQUIRY DETAILS</Text>
                 <View style={{ border: 20, margin: 20 }}>
-                  <Text style={styles.dropDownTextLabel}>Enquiry Type</Text>
-                  <Picker
-                    mode="dropdown"
-                    iosIcon={<Icon name="arrow-down" />}
-                    style={{ width: undefined }}
-                    selectedValue={this.state.EnquiryType}
-                    onValueChange={this.DropdownQuickEnquiryType.bind(this)}
-                  >
-                    <Picker.Item label="-None-" value="" />
-                    {this.state.quickEnquiryTypeData.map((EnquiryType) => {
-                      return (
-                        <Picker.Item
-                          label={EnquiryType.label}
-                          value={EnquiryType.value}
-                          key={EnquiryType.value}
-                        />
-                      );
-                    })}
-                  </Picker>
+                  <Text style={styles.dropDownTextLabel}>Type <Text style={{color:"#E92D46"}}>*</Text></Text>
+                  <RadioChip options={this.state.quickEnquiryTypeData} onValueChange={this.DropdownEnquiryType.bind(this)} />
+                  
 
-                  <Text style={styles.dropDownTextLabel}>Enquiry Source</Text>
+                  <Text style={styles.dropDownTextLabel}>Source <Text style={{color:"#E92D46"}}>*</Text></Text>
                   {this.state.isEnquirySourceLoading == true ? (
                     <ActivityIndicator size="small" color="#E31837" animating />
                   ) : (
-                    <Picker
-                      enabled={this.state.Enquiry_Source__c.length > 0}
-                      mode="dropdown"
-                      iosIcon={<Icon name="arrow-down" />}
-                      style={{ width: undefined }}
-                      selectedValue={this.state.EnquirySource}
-                      onValueChange={this.DropdownEnquirySource.bind(this)}
-                    >
-                      <Picker.Item label="-None-" value="" />
-                      {this.state.Enquiry_Source__c.map((EnquirySource) => {
-                        return (
-                          <Picker.Item
-                            label={EnquirySource.key}
-                            value={EnquirySource.value}
-                            key={EnquirySource.value}
-                          />
-                        );
-                      })}
-                    </Picker>
+                    <RadioChip options={this.state.Enquiry_Source__c} onValueChange={this.DropdownEnquirySource.bind(this)} />
+                    
                   )}
 
-                  <Text style={styles.dropDownTextLabel}>
-                    Enquiry Sub Source
-                  </Text>
-                  <Picker
-                    mode="dropdown"
-                    iosIcon={<Icon name="arrow-down" />}
-                    style={{ width: undefined }}
-                    selectedValue={this.state.SubSource}
-                    onValueChange={this.DropdownSubSource.bind(this)}
-                  >
-                    <Picker.Item label="-None-" value="" />
-                    {this.state.quickEnquirySubSourceData.map((UsageArea) => {
-                      return (
-                        <Picker.Item
-                          label={UsageArea.label}
-                          value={UsageArea.value}
-                          key={UsageArea.value}
-                        />
-                      );
-                    })}
-                  </Picker>
-
-                  <Text style={styles.dropDownTextLabel}>Likely Purchase</Text>
-                  <View
-                    style={{ border: 20, margin: 20, flexDirection: "row" }}
-                  >
-                    <Row style={{ alignItems: "center", flex: 1 }}>
-                      <RadioButton
-                        color="black"
-                        value="second"
-                        status={
-                          checkedLikelyPurchase === "LT15"
-                            ? "checked"
-                            : "unchecked"
-                        }
-                        onPress={() => {
-                          this.setState({ checkedLikelyPurchase: "LT15" });
-                        }}
-                      />
-                      <Label>Hot</Label>
-
-                      <RadioButton
-                        color="black"
-                        value="second"
-                        status={
-                          checkedLikelyPurchase === "GT15"
-                            ? "checked"
-                            : "unchecked"
-                        }
-                        onPress={() => {
-                          this.setState({ checkedLikelyPurchase: "GT15" });
-                        }}
-                      />
-                      <Label>Warm</Label>
-
-                      <RadioButton
-                        color="black"
-                        value="second"
-                        status={
-                          checkedLikelyPurchase === "GT45"
-                            ? "checked"
-                            : "unchecked"
-                        }
-                        onPress={() => {
-                          this.setState({ checkedLikelyPurchase: "GT45" });
-                        }}
-                      />
-                      <Label>Cold</Label>
-                    </Row>
-                    {/* {this.state.quickEnquiryLikelyPurchase.map((lp) => {
-                    <Row style={{ alignItems: "center", flex: 1 }}>
+                  <Text style={styles.dropDownTextLabel}>Sub Source <Text style={{color:"#E92D46"}}>*</Text></Text>
+                  {this.state.isEnquirySubSourceLoading == true ? (
+                    <ActivityIndicator size="small" color="#E31837" animating />
+                  ) : (
+                    <RadioChip options={this.state.Enquiry_Sub_Source__c} onValueChange={this.DropdownEnquirySubSource.bind(this)}/>
                     
-                      <RadioButton
-                        color="black"
-                        value="second"
-                        status={
-                          checkedLikelyPurchase === lp.label
-                            ? "checked"
-                            : "unchecked"
-                        }
-                        onPress={() => {
-                          this.setState({ checkedLikelyPurchase: lp.value,});
-                        }}
-                      />
-                      <Label>{lp.label}</Label>
-                     
-                      </Row>
-                    })} */}
-
-                  </View>
-
-                  {/* <Text style={styles.dropDownTextLabel}>
-                    Next FollowUp Actions
-                  </Text>
-                  <Picker
-                    mode="dropdown"
-                    iosIcon={<Icon name="arrow-down" />}
-                    style={{ width: undefined }}
-                    selectedValue={this.state.NextFollowUpActions}
-                    onValueChange={this.DropdownNextFollowUpActions.bind(this)}
-                  >
-                    <Picker.Item label="Next FollowUp Actions" />
-                  </Picker> */}
+                  )}
+                  
+                  <Text style={styles.dropDownTextLabel}>Likely Purchase <Text style={{color:"#E92D46"}}>*</Text></Text>
+                  <RadioChip options={this.state.quickEnquiryLikelyPurchase} onValueChange={this.DropdownLikelyPurchase.bind(this)}/>
                 </View>
               </View>
-            </View>
-          </ProgressStep>
 
-          <ProgressStep
-            label="Personal Details"
-            onNext={this.validatePersonalDetailsStep}
-            errors={this.state.personalDetailsStepHasError}
-          >
-            {/* <Card style={{ alignItems: 'center', marginRight: 10, marginLeft: 10, shadowColor: '#cccccc', shadowRadius: 10 }}> */}
-            <View>
-              <View
-                style={{
-                  borderWidth: 1,
-                  margin: "5%",
-                  borderColor: "#00000000",
-                  borderRadius: 10,
-                  elevation: 1,
-                  backgroundColor: "#E3DFCE",
-                }}
-              >
-                <View style={{ border: 20, margin: 20 }}>
-                  <Row style={{ alignItems: "center" }}>
-                    <RadioButton
-                      color="black"
-                      value="second"
-                      status={checked === "first" ? "checked" : "unchecked"}
-                      onPress={() => {
-                        this.setState({ checked: "first" });
-                      }}
-                    />
-                    <Label>Mr</Label>
+              <View style={styles.bigcard}> 
+               <Text style={styles.title}>PERSONAL DETAILS</Text>
+               <View style={{ border: 20, margin: 20 }}>
+                  <RadioChip options={this.state.quickEnquirySalutation} onValueChange={this.setSalutation.bind(this)}/>
 
-                    <RadioButton
-                      color="black"
-                      value="second"
-                      status={checked === "second" ? "checked" : "unchecked"}
-                      onPress={() => {
-                        this.setState({ checked: "second" });
-                      }}
-                    />
-                    <Label>Mrs</Label>
-
-                    <RadioButton
-                      color="black"
-                      value="second"
-                      status={checked === "third" ? "checked" : "unchecked"}
-                      onPress={() => {
-                        this.setState({ checked: "third" });
-                      }}
-                    />
-                    <Label>Ms</Label>
-
-                    <RadioButton
-                      color="black"
-                      value="second"
-                      status={checked === "fourth" ? "checked" : "unchecked"}
-                      onPress={() => {
-                        this.setState({ checked: "fourth" });
-                      }}
-                    />
-                    <Label>Dr</Label>
-                  </Row>
+                  <Text style={styles.dropDownTextLabel}>First Name<Text style={{color:"#E92D46"}}>*</Text></Text>
                   <TextInput
+                    placeholder="Enter First Name"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.FirstName}
+                    onChangeText={(FirstName) => {this.setState({ FirstName });}}
                     style={styles.inputs}
-                    type="outlined"
-                    label="Name"
-                    value={this.state.FirstName}
-                    onChangeText={(FirstName) => this.setState({ FirstName })}
-                    mode="outlined"
-                    returnKeyType="next"
-                    ref={this.GoToFirstName}
-                    onSubmitEditing={() => this.GoToLastName.current.focus()}
-                    blurOnSubmit={false}
-                    theme={{
-                      colors: {
-                        primary: "#272727",
-                        underlineColor: "transparent",
-                      },
-                    }}
-                    onBlur={() => {
-                      //this.getNameValidate();
-                    }}
+                    
                   />
-                  {this.state.FirstName == "" ? (
-                    <Text style={{ color: "red" }}>{this.state.name}</Text>
-                  ) : null}
-                  <TextInput
-                    style={styles.inputs}
-                    type="outlined"
-                    label="Last Name"
-                    value={this.state.LastName}
-                    onChangeText={(LastName) => this.setState({ LastName })}
-                    mode="outlined"
-                    returnKeyType="next"
-                    ref={this.GoToLastName}
-                    onSubmitEditing={() => this.GoToEmail.current.focus()}
-                    blurOnSubmit={false}
-                    theme={{
-                      colors: {
-                        primary: "#272727",
-                        underlineColor: "transparent",
-                      },
-                    }}
-                    onBlur={() => {
-                      //this.getLastNameValidate();
-                    }}
-                  />
-                  {this.state.LastName == "" ? (
-                    <Text style={{ color: "red" }}>{this.state.lastName}</Text>
-                  ) : null}
 
+                  <Text style={styles.dropDownTextLabel}>Last Name<Text style={{color:"#E92D46"}}>*</Text></Text>
                   <TextInput
+                    placeholder="Enter Last Name"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.LastName}
+                    onChangeText={(LastName) => {this.setState({ LastName });}}
                     style={styles.inputs}
-                    type="outlined"
-                    label="Email"
-                    value={this.state.Email}
-                    onChangeText={(Email) => this.setState({ Email })}
-                    mode="outlined"
-                    returnKeyType="next"
-                    keyboardType="email-address"
-                    ref={this.GoToEmail}
-                    blurOnSubmit={false}
-                    onSubmitEditing={() =>
-                      this.GoToMobileNumber.current.focus()
-                    }
-                    theme={{
-                      colors: {
-                        primary: "#272727",
-                        underlineColor: "transparent",
-                      },
-                    }}
-                    onBlur={() => {
-                      //this.getEmailValidate();
-                    }}
+                    
                   />
-                  {this.state.Email == "" ? (
-                    <Text style={{ color: "red" }}>{this.state.email}</Text>
-                  ) : null}
 
+                  <Text style={styles.dropDownTextLabel}>Email <Text style={{color:"#E92D46"}}>*</Text></Text>
                   <TextInput
+                    placeholder="Enter Email Id"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.Email}
+                    onChangeText={(Email) => {this.setState({ Email });}}
                     style={styles.inputs}
-                    type="outlined"
-                    label="Mobile Number"
-                    value={this.state.MobileNumber}
-                    onChangeText={(MobileNumber) =>
-                      this.setState({ MobileNumber })
-                    }
-                    mode="outlined"
-                    keyboardType="number-pad"
-                    maxLength={10}
-                    returnKeyType="next"
-                    ref={this.GoToMobileNumber}
-                    blurOnSubmit={false}
-                    theme={{
-                      colors: {
-                        primary: "#272727",
-                        underlineColor: "transparent",
-                      },
-                    }}
-                    onBlur={() => {
-                      //this.getMobileNumberValidate();
-                    }}
+                    
                   />
-                  {this.state.MobileNumber == "" ? (
-                    <Text style={{ color: "red" }}>
-                      {this.state.mobileNumber}
-                    </Text>
-                  ) : null}
 
-                  {/* <TextInput
+                  <Text style={styles.dropDownTextLabel}>Mobile<Text style={{color:"#E92D46"}}>*</Text></Text>
+                  <TextInput
+                    placeholder="Enter Mobile Number"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.MobilePhone}
+                    onChangeText={(MobilePhone) => {this.setState({ MobilePhone });}}
                     style={styles.inputs}
-                    type="outlined"
-                    label="Referral Mobile Number"
-                    value={this.state.ReferralMobileNumber}
-                    onChangeText={ReferralMobileNumber =>
-                      this.setState({ ReferralMobileNumber })
-                    }
-                    mode="outlined"
-                    keyboardType="number-pad"
-                    maxLength={10}
-                    ref={this.GoToReferralMobileNumber}
-                  /> */}
-                </View>
+                    
+                  />
+                  
+               </View>
               </View>
-            </View>
-            {/* </Card> */}
-          </ProgressStep>
 
-          <ProgressStep
-            label="Product"
-            onNext={this.validateProductStep}
-            errors={this.state.productStepHasError}
-          >
-            <View
-              style={{
-                borderWidth: 1,
-                margin: "5%",
-                borderColor: "#00000000",
-                borderRadius: 10,
-                elevation: 1,
-                backgroundColor: "#E3DFCE",
-              }}
-            >
-              <View style={{ border: 20, margin: 20 }}>
-                {modelKeys.length > 0 && (
-                  <Row
-                    style={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 10,
-                    }}
-                  >
-                    <Text style={{ flex: 2, fontWeight: "bold" }}>Model</Text>
-                    <Text style={{ flex: 1, fontWeight: "bold" }}>
-                      Quantity
-                    </Text>
-                    <Text style={{ flex: 1, fontWeight: "bold" }} />
-                  </Row>
-                )}
-                {modelKeys.map((key) => {
-                  const dataArray = [
-                    {
-                      title: "View Details",
-                      content: "Variant : '"+this.state.addListOfModel[key].Variant+"', Color : '"+this.state.addListOfModel[key].Color+"', Seat Capacity : '"+this.state.addListOfModel[key].SeatCapacity+"', Fuel Type : '"+this.state.addListOfModel[key].FuelType+"'",
-                    }
-                  ];
-                  return (
-                  <View>
-                  <Row
-                      style={{
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text style={{ flex: 2 }}>
-                        {(this.state.addListOfModel[key].model ==
-                        this.state.primaryInterestModel
-                          ? "* "
-                          : "") + this.state.addListOfModel[key].model}
-                      </Text>
-                      <Text style={{ flex: 1 }} alignSelf="flex-end">
-                        {this.state.addListOfModel[key].qty}
-                      </Text>
-                      <Icon
-                        style={{ flex: 1 }}
-                        name="close"
-                        onPress={() => {
-                          this.removeTextInput(
-                            this.state.addListOfModel[key].model
-                          );
-                        }}
-                        style={{ color: "#E31837" }}
-                      />
-                      {/* <Accordion dataArray={dataArray} expanded={0}/> */}
-                    </Row>
-                    <Row>
-                    <Accordion dataArray={dataArray} headerStyle = {{backgroundColor : 'transparent'}}/>
-                    </Row>
-                  </View>
-                  );
-                })}
-                <Button
-                  dark
-                  rounded
-                  style={{
-                    marginTop: 10,
-                    alignSelf: "center",
-                    alignContent: "center",
-                  }}
-                  onPress={() => this.openModal()}
-                >
-                  <Icon name="add" style={{ color: "#E31837" }} />
-                  <Text
-                    style={{
-                      color: "white",
-                      fontWeight: "bold",
-                      textAlign: "center",
-                      paddingRight: "10%",
-                    }}
-                  >
-                    Vehicle
-                  </Text>
-                </Button>
-              </View>
-            </View>
-          </ProgressStep>
-
-          <ProgressStep label="Followup" onSubmit={this.validateFollowUpStep}>
-            <ScrollView>
-              <View
-                style={{
-                  borderWidth: 1,
-                  margin: "5%",
-                  borderColor: "#00000000",
-                  borderRadius: 10,
-                  elevation: 1,
-                  backgroundColor: "#E3DFCE",
-                }}
-              >
-                <View style={{ border: 20, margin: 20 }}>
-                  <Item picker style={{ flexDirection: "row" }}>
-                    <Label style={{ flex: 1 }}>Type</Label>
-                    <Picker
-                      mode="dropdown"
-                      iosIcon={<Icon name="arrow-down" />}
-                      style={{ width: undefined }}
-                      selectedValue={this.state.type}
-                      onValueChange={this.DropdownType.bind(this)}
-                    >
-                      <Picker.Item label="-None-" />
-                      {this.state.TaskType.map((type) => {
-                        return (
-                          <Picker.Item
-                            label={type.label}
-                            value={type.value}
-                            key={type.value}
-                          />
-                        );
-                      })}
-                    </Picker>
-                  </Item>
-
-                  <Item picker style={{ flexDirection: "row" }}>
-                    <Label style={{ flex: 1 }}>Model</Label>
-                    <Picker
-                      mode="dropdown"
-                      iosIcon={<Icon name="arrow-down" />}
-                      style={{ width: undefined }}
-                      selectedValue={this.state.model}
-                      onValueChange={this.DropdownModel.bind(this)}
-                    >
-                      <Picker.Item label="-None-" />
-                      {modelKeys.map((model) => {
-                        return (
-                          <Picker.Item
-                            label={model}
-                            value={model}
-                            key={model}
-                          />
-                        );
-                      })}
-                    </Picker>
-                  </Item>
-
-                  <Row
-                    style={{
-                      flex: 1,
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Label style={{ color: "black" }}>Call Date :</Label>
-                    <DatePicker
-                      defaultDate={new Date()}
-                      minimumDate={new Date()}
-                      maximumDate={
-                        new Date(
-                          this.state.currentDate.getTime() +
-                            15 * 24 * 60 * 60 * 1000
-                        )
-                      }
-                      locale={"en"}
-                      timeZoneOffsetInMinutes={undefined}
-                      modalTransparent={false}
-                      animationType={"fade"}
-                      androidMode={"default"}
-                      placeHolderText={
-                        <Icon style={{ color: "#E31837" }} name="calendar" />
-                      } //"Order Date"
-                      textStyle={{ color: "black" }}
-                      placeHolderTextStyle={{ color: "#d3d3d3" }}
-                      onDateChange={this.setDate}
-                      disabled={false}
-                    />
-                  </Row>
-
-                  <Picker
-                    mode="dropdown"
-                    placeholder="Select Time"
-                    placeholderStyle={{ color: "#2874F0" }}
-                    note={false}
-                    selectedValue={this.state.selectedTimeSlot} //? this.state.selectedTimeSlot : nextTimeSlot}
-                    onValueChange={this.DropdownTime.bind(this)}
-                  >
-                    <Picker.Item label="12:00 AM" value="0:0" key="0:0" />
-                    <Picker.Item label="12:15 AM" value="0:15" key="0:15" />
-                    <Picker.Item label="12:30 AM" value="0:30" key="0:30" />
-                    <Picker.Item label="12:45 AM" value="0:45" key="0:45" />
-                    <Picker.Item label="1:00 AM" value="1:0" key="1:0" />
-                    <Picker.Item label="1:15 AM" value="1:15" key="1:15" />
-                    <Picker.Item label="1:30 AM" value="1:30" key="1:30" />
-                    <Picker.Item label="1:45 AM" value="1:45" key="1:45" />
-                    <Picker.Item label="2:00 AM" value="2:0" key="2:0" />
-                    <Picker.Item label="2:15 AM" value="2:15" key="2:15" />
-                    <Picker.Item label="2:30 AM" value="2:30" key="2:30" />
-                    <Picker.Item label="2:45 AM" value="2:45" key="2:45" />
-                    <Picker.Item label="3:00 AM" value="3:0" key="3:0" />
-                    <Picker.Item label="3:15 AM" value="3:15" key="3:15" />
-                    <Picker.Item label="3:30 AM" value="3:30" key="3:30" />
-                    <Picker.Item label="3:45 AM" value="3:45" key="3:45" />
-                    <Picker.Item label="4:00 AM" value="4:0" key="4:0" />
-                    <Picker.Item label="4:15 AM" value="4:15" key="4:15" />
-                    <Picker.Item label="4:30 AM" value="4:30" key="4:30" />
-                    <Picker.Item label="4:45 AM" value="4:45" key="4:45" />
-                    <Picker.Item label="5:00 AM" value="5:0" key="5:0" />
-                    <Picker.Item label="5:15 AM" value="5:15" key="5:15" />
-                    <Picker.Item label="5:30 AM" value="5:30" key="5:30" />
-                    <Picker.Item label="5:45 AM" value="5:45" key="5:45" />
-                    <Picker.Item label="6:00 AM" value="6:0" key="6:0" />
-                    <Picker.Item label="6:15 AM" value="6:15" key="6:15" />
-                    <Picker.Item label="6:30 AM" value="6:30" key="6:30" />
-                    <Picker.Item label="6:45 AM" value="6:45" key="6:45" />
-                    <Picker.Item label="7:00 AM" value="7:0" key="7:0" />
-                    <Picker.Item label="7:15 AM" value="7:15" key="7:15" />
-                    <Picker.Item label="7:30 AM" value="7:30" key="7:30" />
-                    <Picker.Item label="7:45 AM" value="7:45" key="7:45" />
-                    <Picker.Item label="8:00 AM" value="8:0" key="8:0" />
-                    <Picker.Item label="8:15 AM" value="8:15" key="8:15" />
-                    <Picker.Item label="8:30 AM" value="8:30" key="8:30" />
-                    <Picker.Item label="8:45 AM" value="8:45" key="8:45" />
-                    <Picker.Item label="9:00 AM" value="9:0" key="9:0" />
-                    <Picker.Item label="9:15 AM" value="9:15" key="9:15" />
-                    <Picker.Item label="9:30 AM" value="9:30" key="9:30" />
-                    <Picker.Item label="9:45 AM" value="9:45" key="9:45" />
-                    <Picker.Item label="10:00 AM" value="10:0" key="10:0" />
-                    <Picker.Item label="10:15 AM" value="10:15" key="10:15" />
-                    <Picker.Item label="10:30 AM" value="10:30" key="10:30" />
-                    <Picker.Item label="10:45 AM" value="10:45" key="10:45" />
-                    <Picker.Item label="11:00 AM" value="11:0" key="11:0" />
-                    <Picker.Item label="11:15 AM" value="11:15" key="11:15" />
-                    <Picker.Item label="11:30 AM" value="11:30" key="11:30" />
-                    <Picker.Item label="11:45 AM" value="11:45" key="11:45" />
-
-                    <Picker.Item label="12:00 PM" value="12:0" key="12:0" />
-                    <Picker.Item label="12:15 PM" value="12:15" key="12:15" />
-                    <Picker.Item label="12:30 PM" value="12:30" key="12:30" />
-                    <Picker.Item label="12:45 PM" value="12:45" key="12:45" />
-                    <Picker.Item label="1:00 PM" value="13:0" key="13:0" />
-                    <Picker.Item label="1:15 PM" value="13:15" key="13:15" />
-                    <Picker.Item label="1:30 PM" value="13:30" key="13:30" />
-                    <Picker.Item label="1:45 PM" value="13:45" key="13:45" />
-                    <Picker.Item label="2:00 PM" value="14:0" key="14:0" />
-                    <Picker.Item label="2:15 PM" value="14:15" key="14:15" />
-                    <Picker.Item label="2:30 PM" value="14:30" key="14:30" />
-                    <Picker.Item label="2:45 PM" value="14:45" key="14:45" />
-                    <Picker.Item label="3:00 PM" value="15:0" key="15:0" />
-                    <Picker.Item label="3:15 PM" value="15:15" key="15:15" />
-                    <Picker.Item label="3:30 PM" value="15:30" key="15:30" />
-                    <Picker.Item label="3:45 PM" value="15:45" key="15:45" />
-                    <Picker.Item label="4:00 PM" value="16:0" key="16:0" />
-                    <Picker.Item label="4:15 PM" value="16:15" key="16:15" />
-                    <Picker.Item label="4:30 PM" value="16:30" key="16:30" />
-                    <Picker.Item label="4:45 PM" value="16:45" key="16:45" />
-                    <Picker.Item label="5:00 PM" value="17:0" key="17:0" />
-                    <Picker.Item label="5:15 PM" value="17:15" key="17:15" />
-                    <Picker.Item label="5:30 PM" value="17:30" key="17:30" />
-                    <Picker.Item label="5:45 PM" value="17:45" key="17:45" />
-                    <Picker.Item label="6:00 PM" value="18:0" key="18:0" />
-                    <Picker.Item label="6:15 PM" value="18:15" key="18:15" />
-                    <Picker.Item label="6:30 PM" value="18:30" key="18:30" />
-                    <Picker.Item label="6:45 PM" value="18:45" key="18:45" />
-                    <Picker.Item label="7:00 PM" value="19:0" key="19:0" />
-                    <Picker.Item label="7:15 PM" value="19:15" key="19:15" />
-                    <Picker.Item label="7:30 PM" value="19:30" key="19:30" />
-                    <Picker.Item label="7:45 PM" value="19:45" key="19:45" />
-                    <Picker.Item label="8:00 PM" value="20:0" key="20:0" />
-                    <Picker.Item label="8:15 PM" value="20:15" key="20:15" />
-                    <Picker.Item label="8:30 PM" value="20:30" key="20:30" />
-                    <Picker.Item label="8:45 PM" value="20:45" key="20:45" />
-                    <Picker.Item label="9:00 PM" value="21:0" key="21:0" />
-                    <Picker.Item label="9:15 PM" value="21:15" key="21:15" />
-                    <Picker.Item label="9:30 PM" value="21:30" key="21:30" />
-                    <Picker.Item label="9:45 PM" value="21:45" key="21:45" />
-                    <Picker.Item label="10:00 PM" value="22:0" key="22:0" />
-                    <Picker.Item label="10:15 PM" value="22:15" key="22:15" />
-                    <Picker.Item label="10:30 PM" value="22:30" key="22:30" />
-                    <Picker.Item label="10:45 PM" value="22:45" key="22:45" />
-                    <Picker.Item label="11:00 PM" value="23:0" key="23:0" />
-                    <Picker.Item label="11:15 PM" value="23:15" key="23:15" />
-                    <Picker.Item label="11:30 PM" value="23:30" key="23:30" />
-                    <Picker.Item label="11:45 PM" value="23:45" key="23:45" />
-                  </Picker>
-                </View>
-              </View>
-            </ScrollView>
-          </ProgressStep>
-        </ProgressSteps>
-
-        <Modal
-          animationType={"fade"}
-          transparent={true}
-          visible={this.state.showAddVehicleModal}
-          onRequestClose={() => {
-            //console.log("Modal has been closed.");
-          }}
-        >
-          {/*All views of Modal*/}
-          <View style={styles.showAddVehicleModal}>
-            <View style={{ flex: 1, paddingHorizontal: 10 }}>
-              <Button
-                transparent
-                style={{ flexDirection: "row-reverse" }}
-                onPress={() => {
-                  this.setState({
-                    showAddVehicleModal: !this.state.showAddVehicleModal,
-                  });
-                }}
-              >
-                <Icon style={{ color: "black" }} name="close" />
-              </Button>
-              <Text
-                style={{
-                  fontSize: 18,
-                  textAlign: "center",
-                  fontWeight: "bold",
-                }}
-              >
-                Add Product
-              </Text>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={{ flexDirection: "column", marginVertical: "5%" }}>
-                  <Text style={styles.dropDownTextLabel}>
-                    Select Product Family{" "}
-                  </Text>
+              <View style={styles.bigcard}> 
+               <Text style={styles.title}>MODEL DETAILS</Text>
+               <View style={{ border: 20, margin: 20 }}>
+                  <Text style={styles.dropDownTextLabel}>Model <Text style={{color:"#E92D46"}}>*</Text></Text>
                   <Picker
                     mode="dropdown"
                     iosIcon={<Icon name="arrow-down" />}
@@ -1665,162 +1081,214 @@ class QuickEnquiryOnSearch extends Component {
                       );
                     })}
                   </Picker>
+
+                  <Text style={styles.dropDownTextLabel}>Quantity <Text style={{color:"#E92D46"}}>*</Text></Text>
                   <TextInput
+                    placeholder="Enter Quantity"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.Quantity}
+                    onChangeText={(Quantity) => {this.setState({ Quantity });}}
                     style={styles.inputs}
-                    type="outlined"
-                    label="Quantity"
-                    value={this.state.quantity}
-                    onChangeText={(quantity) =>
-                      this.setState({ quantity: quantity })
-                    }
-                    mode="outlined"
-                    returnKeyType="next"
-                    keyboardType="numeric"
-                    blurOnSubmit={false}
-                    theme={{
-                      colors: {
-                        primary: "#272727",
-                        underlineColor: "transparent",
-                      },
-                    }}
+                    
                   />
-                  <Text style={styles.dropDownTextLabel}>
-                    Select Product Interest{" "}
-                  </Text>
-                  <Picker
-                    mode="dropdown"
-                    iosIcon={<Icon name="arrow-down" />}
-                    style={{ width: undefined }}
-                    selectedValue={this.state.interest}
-                    onValueChange={this.DropdownInterest.bind(this)}
-                  >
-                    <Picker.Item
-                      label="Primary Interest"
-                      value="Primary_Interest"
-                      key="Primary_Interest"
-                    />
-                    <Picker.Item
-                      label="Other Interest"
-                      value="Other_Interest"
-                      key="Other_Interest"
-                    />
-                  </Picker>
 
-                  <Button
-                    transparent
-                    disabled={!this.state.chooseModel}
-                    // onPress={this.showDetails = true}
-                  >
-                    <Text>Add Details</Text>
-                  </Button>
+                  <Text style={styles.dropDownTextLabel}>Variant </Text>
+                  <TextInput
+                    placeholder="Select Variant"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.Variant}
+                    onChangeText={(Variant) => {this.setState({ Variant });}}
+                    style={styles.inputs}
 
-                  {this.state.chooseModel ? (
-                    <View style={{ marginBottom: "5%" }}>
-                      <TextInput
-                        style={styles.inputs}
-                        type="outlined"
-                        label="Variant"
-                        value={this.state.Variant}
-                        onChangeText={(Variant) => this.setState({ Variant })}
-                        mode="outlined"
-                        returnKeyType="next"
-                        ref={this.Variant}
-                        blurOnSubmit={false}
-                        onSubmitEditing={() =>
-                          this.GoToMobileNumber.current.focus()
-                        }
-                        theme={{
-                          colors: {
-                            primary: "#272727",
-                            underlineColor: "transparent",
-                          },
-                        }}
-                      />
+                  />
 
-                      <TextInput
-                        style={styles.inputs}
-                        type="outlined"
-                        label="Color"
-                        value={this.state.Color}
-                        onChangeText={(Color) => this.setState({ Color })}
-                        mode="outlined"
-                        returnKeyType="next"
-                        ref={this.Color}
-                        blurOnSubmit={false}
-                        onSubmitEditing={() =>
-                          this.GoToMobileNumber.current.focus()
-                        }
-                        theme={{
-                          colors: {
-                            primary: "#272727",
-                            underlineColor: "transparent",
-                          },
-                        }}
-                      />
+                  <Text style={styles.dropDownTextLabel}>Color </Text>
+                  <TextInput
+                    placeholder="select Color"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.Color}
+                    onChangeText={(Color) => {this.setState({ Color });}}
+                    style={styles.inputs}
+                    
+                  />
 
-                      <TextInput
-                        style={styles.inputs}
-                        type="outlined"
-                        label="Seating Capacity"
-                        value={this.state.SeatCapacity}
-                        onChangeText={(SeatCapacity) =>
-                          this.setState({ SeatCapacity })
-                        }
-                        mode="outlined"
-                        returnKeyType="next"
-                        ref={this.SeatCapacity}
-                        blurOnSubmit={false}
-                        onSubmitEditing={() =>
-                          this.GoToMobileNumber.current.focus()
-                        }
-                        theme={{
-                          colors: {
-                            primary: "#272727",
-                            underlineColor: "transparent",
-                          },
-                        }}
-                      />
+                  <Text style={styles.dropDownTextLabel}>Seating Capacity </Text>
+                  <TextInput
+                    placeholder="Select Seating Capacity"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.SeatCapacity}
+                    onChangeText={(SeatCapacity) => {this.setState({ SeatCapacity });}}
+                    style={styles.inputs}
+                    
+                  />
 
-                      <TextInput
-                        style={styles.inputs}
-                        type="outlined"
-                        label="Fule Type"
-                        value={this.state.FuelType}
-                        onChangeText={(FuelType) => this.setState({ FuelType })}
-                        mode="outlined"
-                        returnKeyType="next"
-                        ref={this.GoToEmail}
-                        blurOnSubmit={false}
-                        onSubmitEditing={() =>
-                          this.GoToMobileNumber.current.focus()
-                        }
-                        theme={{
-                          colors: {
-                            primary: "#272727",
-                            underlineColor: "transparent",
-                          },
-                        }}
-                      />
-                    </View>
-                  ) : null}
-
-                  <Button
-                    danger
-                    style={{
-                      alignSelf: "center",
-                      justifyContent: "center",
-                    }}
-                    onPress={() => {
-                      this.addModel();
-                    }}
-                  >
-                    <Text style={{ color: "white", padding: "5%" }}>Save</Text>
-                  </Button>
-                </View>
-              </ScrollView>
+                  <Text style={styles.dropDownTextLabel}>Fuel Type </Text>
+                  <TextInput
+                    placeholder="Select Fuel Type"
+                    placeholderTextColor="#B3B3B3"
+                    value = {this.state.FuelType}
+                    onChangeText={(FuelType) => {this.setState({ FuelType });}}
+                    style={styles.inputs}
+                    
+                  />
+                </View>    
+              </View>
             </View>
-          </View>
-        </Modal>
+          </ProgressStep>
+
+          <ProgressStep
+            label="Follow Up"
+            onNext={this.validateFollowUpStep}
+            errors={this.state.followUpStepHasError}
+          >
+             <View>
+                <View style={styles.bigcard}> 
+                <Text style={styles.title}>Follow Up details</Text>
+                <View style={{ border: 20, margin: 20 }}>
+                  <Text style={styles.dropDownTextLabel}>Type <Text style={{color:"#E92D46"}}>*</Text></Text>
+                  <RadioChip options={this.state.TaskType} onValueChange={this.DropdownType.bind(this)}/>
+                  
+                  <Text style={styles.dropDownTextLabel}>Date and Time <Text style={{color:"#E92D46"}}>*</Text></Text>
+                  <Row style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignItems: "center",
+                      }}>
+                    <Label style={{ color: "black" }}>Date</Label>
+                    <DatePicker
+                      defaultDate={new Date()}
+                      minimumDate={new Date()}
+                      maximumDate={
+                        new Date(
+                          this.state.currentDate.getTime() +
+                            15 * 24 * 60 * 60 * 1000
+                        )
+                      }
+                      locale={"en"}
+                      timeZoneOffsetInMinutes={undefined}
+                      modalTransparent={false}
+                      animationType={"fade"}
+                      androidMode={"default"}
+                      placeHolderText={
+                        <Icon style={{ color: "#E31837" }} name="calendar" />
+                      }
+                      textStyle={{ color: "black" }}
+                      placeHolderTextStyle={{ color: "#d3d3d3" }}
+                      onDateChange={this.setDate}
+                      disabled={false}
+                    />
+                    <Picker
+                      mode="dropdown"
+                      placeholder="Select Time"
+                      placeholderStyle={{ color: "#2874F0" }}
+                      note={false}
+                      selectedValue={this.state.selectedTimeSlot} //? this.state.selectedTimeSlot : nextTimeSlot}
+                      onValueChange={this.DropdownTime.bind(this)}
+                    >
+                      <Picker.Item label="12:00 AM" value="0:0" key="0:0" />
+                      <Picker.Item label="12:15 AM" value="0:15" key="0:15" />
+                      <Picker.Item label="12:30 AM" value="0:30" key="0:30" />
+                      <Picker.Item label="12:45 AM" value="0:45" key="0:45" />
+                      <Picker.Item label="1:00 AM" value="1:0" key="1:0" />
+                      <Picker.Item label="1:15 AM" value="1:15" key="1:15" />
+                      <Picker.Item label="1:30 AM" value="1:30" key="1:30" />
+                      <Picker.Item label="1:45 AM" value="1:45" key="1:45" />
+                      <Picker.Item label="2:00 AM" value="2:0" key="2:0" />
+                      <Picker.Item label="2:15 AM" value="2:15" key="2:15" />
+                      <Picker.Item label="2:30 AM" value="2:30" key="2:30" />
+                      <Picker.Item label="2:45 AM" value="2:45" key="2:45" />
+                      <Picker.Item label="3:00 AM" value="3:0" key="3:0" />
+                      <Picker.Item label="3:15 AM" value="3:15" key="3:15" />
+                      <Picker.Item label="3:30 AM" value="3:30" key="3:30" />
+                      <Picker.Item label="3:45 AM" value="3:45" key="3:45" />
+                      <Picker.Item label="4:00 AM" value="4:0" key="4:0" />
+                      <Picker.Item label="4:15 AM" value="4:15" key="4:15" />
+                      <Picker.Item label="4:30 AM" value="4:30" key="4:30" />
+                      <Picker.Item label="4:45 AM" value="4:45" key="4:45" />
+                      <Picker.Item label="5:00 AM" value="5:0" key="5:0" />
+                      <Picker.Item label="5:15 AM" value="5:15" key="5:15" />
+                      <Picker.Item label="5:30 AM" value="5:30" key="5:30" />
+                      <Picker.Item label="5:45 AM" value="5:45" key="5:45" />
+                      <Picker.Item label="6:00 AM" value="6:0" key="6:0" />
+                      <Picker.Item label="6:15 AM" value="6:15" key="6:15" />
+                      <Picker.Item label="6:30 AM" value="6:30" key="6:30" />
+                      <Picker.Item label="6:45 AM" value="6:45" key="6:45" />
+                      <Picker.Item label="7:00 AM" value="7:0" key="7:0" />
+                      <Picker.Item label="7:15 AM" value="7:15" key="7:15" />
+                      <Picker.Item label="7:30 AM" value="7:30" key="7:30" />
+                      <Picker.Item label="7:45 AM" value="7:45" key="7:45" />
+                      <Picker.Item label="8:00 AM" value="8:0" key="8:0" />
+                      <Picker.Item label="8:15 AM" value="8:15" key="8:15" />
+                      <Picker.Item label="8:30 AM" value="8:30" key="8:30" />
+                      <Picker.Item label="8:45 AM" value="8:45" key="8:45" />
+                      <Picker.Item label="9:00 AM" value="9:0" key="9:0" />
+                      <Picker.Item label="9:15 AM" value="9:15" key="9:15" />
+                      <Picker.Item label="9:30 AM" value="9:30" key="9:30" />
+                      <Picker.Item label="9:45 AM" value="9:45" key="9:45" />
+                      <Picker.Item label="10:00 AM" value="10:0" key="10:0" />
+                      <Picker.Item label="10:15 AM" value="10:15" key="10:15" />
+                      <Picker.Item label="10:30 AM" value="10:30" key="10:30" />
+                      <Picker.Item label="10:45 AM" value="10:45" key="10:45" />
+                      <Picker.Item label="11:00 AM" value="11:0" key="11:0" />
+                      <Picker.Item label="11:15 AM" value="11:15" key="11:15" />
+                      <Picker.Item label="11:30 AM" value="11:30" key="11:30" />
+                      <Picker.Item label="11:45 AM" value="11:45" key="11:45" />
+
+                      <Picker.Item label="12:00 PM" value="12:0" key="12:0" />
+                      <Picker.Item label="12:15 PM" value="12:15" key="12:15" />
+                      <Picker.Item label="12:30 PM" value="12:30" key="12:30" />
+                      <Picker.Item label="12:45 PM" value="12:45" key="12:45" />
+                      <Picker.Item label="1:00 PM" value="13:0" key="13:0" />
+                      <Picker.Item label="1:15 PM" value="13:15" key="13:15" />
+                      <Picker.Item label="1:30 PM" value="13:30" key="13:30" />
+                      <Picker.Item label="1:45 PM" value="13:45" key="13:45" />
+                      <Picker.Item label="2:00 PM" value="14:0" key="14:0" />
+                      <Picker.Item label="2:15 PM" value="14:15" key="14:15" />
+                      <Picker.Item label="2:30 PM" value="14:30" key="14:30" />
+                      <Picker.Item label="2:45 PM" value="14:45" key="14:45" />
+                      <Picker.Item label="3:00 PM" value="15:0" key="15:0" />
+                      <Picker.Item label="3:15 PM" value="15:15" key="15:15" />
+                      <Picker.Item label="3:30 PM" value="15:30" key="15:30" />
+                      <Picker.Item label="3:45 PM" value="15:45" key="15:45" />
+                      <Picker.Item label="4:00 PM" value="16:0" key="16:0" />
+                      <Picker.Item label="4:15 PM" value="16:15" key="16:15" />
+                      <Picker.Item label="4:30 PM" value="16:30" key="16:30" />
+                      <Picker.Item label="4:45 PM" value="16:45" key="16:45" />
+                      <Picker.Item label="5:00 PM" value="17:0" key="17:0" />
+                      <Picker.Item label="5:15 PM" value="17:15" key="17:15" />
+                      <Picker.Item label="5:30 PM" value="17:30" key="17:30" />
+                      <Picker.Item label="5:45 PM" value="17:45" key="17:45" />
+                      <Picker.Item label="6:00 PM" value="18:0" key="18:0" />
+                      <Picker.Item label="6:15 PM" value="18:15" key="18:15" />
+                      <Picker.Item label="6:30 PM" value="18:30" key="18:30" />
+                      <Picker.Item label="6:45 PM" value="18:45" key="18:45" />
+                      <Picker.Item label="7:00 PM" value="19:0" key="19:0" />
+                      <Picker.Item label="7:15 PM" value="19:15" key="19:15" />
+                      <Picker.Item label="7:30 PM" value="19:30" key="19:30" />
+                      <Picker.Item label="7:45 PM" value="19:45" key="19:45" />
+                      <Picker.Item label="8:00 PM" value="20:0" key="20:0" />
+                      <Picker.Item label="8:15 PM" value="20:15" key="20:15" />
+                      <Picker.Item label="8:30 PM" value="20:30" key="20:30" />
+                      <Picker.Item label="8:45 PM" value="20:45" key="20:45" />
+                      <Picker.Item label="9:00 PM" value="21:0" key="21:0" />
+                      <Picker.Item label="9:15 PM" value="21:15" key="21:15" />
+                      <Picker.Item label="9:30 PM" value="21:30" key="21:30" />
+                      <Picker.Item label="9:45 PM" value="21:45" key="21:45" />
+                      <Picker.Item label="10:00 PM" value="22:0" key="22:0" />
+                      <Picker.Item label="10:15 PM" value="22:15" key="22:15" />
+                      <Picker.Item label="10:30 PM" value="22:30" key="22:30" />
+                      <Picker.Item label="10:45 PM" value="22:45" key="22:45" />
+                      <Picker.Item label="11:00 PM" value="23:0" key="23:0" />
+                      <Picker.Item label="11:15 PM" value="23:15" key="23:15" />
+                      <Picker.Item label="11:30 PM" value="23:30" key="23:30" />
+                      <Picker.Item label="11:45 PM" value="23:45" key="23:45" />
+                    </Picker>
+                  </Row>
+                </View>
+              </View>  
+              </View>  
+          </ProgressStep>
+        </ProgressSteps>
       </View>
     );
   }
@@ -1830,13 +1298,22 @@ const styles = StyleSheet.create({
   EnquiryOverallView: {
     flex: 1,
   },
+  ProgressSteps:{
+    marginBottom:"3%"
+  },
   dropDownTextLabel: {
-    color: "gray",
-    fontSize: 12,
+    color: "#000000",
+    fontSize: 14,
+    textTransform: 'uppercase'
   },
   inputs: {
     flex: 1,
     alignSelf: "stretch",
+    borderWidth: 1,
+    borderColor:"#000000",
+    height:"50%",
+    marginBottom:"2%",
+    marginTop:"2%"
   },
   container: {
     flex: 1,
@@ -1854,7 +1331,7 @@ const styles = StyleSheet.create({
     margin: "10%",
   },
   text: {
-    color: "#3f2949",
+    color: "#000000",
   },
   OnErrorTextColor: {
     color: "red",
@@ -1869,6 +1346,29 @@ const styles = StyleSheet.create({
   collapse: {
     marginLeft: 20,
   },
+  title : {
+    marginTop:"3%",
+    fontFamily : 'Poppins-Regular',
+    fontWeight:"400",
+    fontSize: 16,
+    textAlign:"center",
+    textTransform: 'uppercase'
+  }, 
+
+  bigcard:{
+    borderWidth: 1,
+    margin: "3%",
+    marginTop:"5%",
+    borderColor: "#F2F3F4",
+    borderRadius: 10,
+    elevation: 1,
+    backgroundColor: "#FFFFFF",
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5,
+  }
 });
 
 function Product(model, qty, interest, Variant, Color, SeatCapacity, FuelType) {

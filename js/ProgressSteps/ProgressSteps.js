@@ -32,13 +32,14 @@ class ProgressSteps extends Component {
     <ProgressHeader 
       totalSteps={this.state.stepCount}
       activeStep={this.state.activeStep}
-      circleRadius={28}
-      circleBorderWidth={6}
-      circleProgressColor={'green'}
-      circleShadowColor={'#E62C36'}
+      circleRadius={30}
+      circleBorderWidth={8}
+      circleProgressColor={'#E92D46'}
+      circleShadowColor={'#B3B3B3'}
       circleBgColor={'#fff'}
       stepLabel={this.props.children[this.state.activeStep].props.label}
-      nextStepLabel={this.props.children[this.state.activeStep + 1].props.label}
+      nextStepLabel={this.props.children[this.state.activeStep + 1] ? this.props.children[this.state.activeStep + 1].props.label : ''}
+      
     />
    ) 
   };

@@ -14,7 +14,7 @@ const soupEntries = [
 	{ path: "Segment__c", type: "string" },
 	{ path: "Enquiry_Type__c", type: "string" },
 	{ path: "Enquiry_Source__c", type: "string" },
-	{ path: "Sub_Source__c", type: "string" },
+	{ path: "Enquiry_Sub_Source__c", type: "string" },
 	{ path: "Likely_Purchase__c", type: "string" },
 
 	{ path: "__local__", type: "string" },
